@@ -1,18 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:type" content="test">
+    <meta property="og:type" content="website">
     <meta property="og:url" content="https://seominkyung.github.io/test2/">
-    <meta property="og:title" content="TEST">
-    <meta property="og:description" content="This is test webpage">
+    <meta property="og:title" content="로또 번호 추첨기">
+    <meta property="og:description" content="간단한 로또 번호 생성기 사이트입니다.">
     <meta property="og:image" content="image/test.png">
-    <title>Document</title>
+    <title>로또 번호 추첨기</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --shadow: rgba(0, 0, 0, 0.4);
+            
+            /* Lotto Ball Colors */
+            --lotto-1: #fbc400; /* 1-10: Yellow */
+            --lotto-11: #69c8f2; /* 11-20: Blue */
+            --lotto-21: #ff7272; /* 21-30: Red */
+            --lotto-31: #aaaaaa; /* 31-40: Gray */
+            --lotto-41: #b0d840; /* 41-45: Green */
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
+            color: var(--text);
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+            padding: 20px;
+        }
+        .container {
+            width: min(600px, 100%);
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px var(--shadow);
+            padding: 40px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        header p {
+            color: var(--muted);
+            font-size: 1rem;
+            margin-bottom: 32px;
+        }
+        .main {
+            display: grid;
+            gap: 32px;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .input-group {
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+        .controls input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            color: var(--text);
+            padding: 16px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .controls input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+        }
+        .controls button {
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 700;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
+        }
+        .controls button:active {
+            transform: translateY(0);
+        }
+        .result-area {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        .ball {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: inset -4px -4px 8px rgba(0,0,0,0.2), 
+                        inset 4px 4px 8px rgba(255,255,255,0.2),
+                        0 8px 16px rgba(0,0,0,0.3);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        
+        .ball.range-1 { background: radial-gradient(circle at 30% 30%, #ffd94d, var(--lotto-1)); }
+        .ball.range-11 { background: radial-gradient(circle at 30% 30%, #90d9f7, var(--lotto-11)); }
+        .ball.range-21 { background: radial-gradient(circle at 30% 30%, #ff9e9e, var(--lotto-21)); }
+        .ball.range-31 { background: radial-gradient(circle at 30% 30%, #cccccc, var(--lotto-31)); }
+        .ball.range-41 { background: radial-gradient(circle at 30% 30%, #c9e673, var(--lotto-41)); }
+
+        .footer {
+            margin-top: 32px;
+            color: var(--muted);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 24px; }
+            header h1 { font-size: 1.875rem; }
+            .ball { width: 48px; height: 48px; font-size: 1.125rem; }
+            .numbers { gap: 8px; }
+        }
+    </style>
 </head>
 <body>
-    <img src="image/test.png" alt="사진을 불러올 수 없습니다.">
+    <div class="container">
+        <header>
+            <h1>로또 6/45 추첨기</h1>
+            <p>행운의 숫자를 뽑아보세요!</p>
+        </header>
+
+        <section class="main">
+            <div class="controls">
+                <div class="input-group">
+                    <label for="manualNumbers">고정하고 싶은 번호 (선택 사항, 최대 5개)</label>
+                    <input id="manualNumbers" type="text" placeholder="예: 7, 14, 21">
+                </div>
+                <button id="generateBtn">번호 생성하기</button>
+            </div>
+
+            <div class="result-area">
+                <div id="numbers" class="numbers">
+                    <!-- Numbers will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <div class="footer">
+            쉼표로 구분하여 번호를 입력하면 해당 번호를 포함하여 추출합니다.<br>
+            오늘 당신에게 행운이 깃들기를 바랍니다!
+        </div>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const numbersContainer = document.getElementById('numbers');
+        const manualInput = document.getElementById('manualNumbers');
+
+        function getRangeClass(num) {
+            if (num <= 10) return 'range-1';
+            if (num <= 20) return 'range-11';
+            if (num <= 30) return 'range-21';
+            if (num <= 40) return 'range-31';
+            return 'range-41';
+        }
+
+        function createBall(number, delay) {
+            const ball = document.createElement('div');
+            ball.className = `ball ${getRangeClass(number)}`;
+            ball.textContent = number;
+            ball.style.animationDelay = `${delay}s`;
+            return ball;
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function parseManualInput() {
+            const raw = manualInput.value.trim();
+            if (!raw) return [];
+            
+            // Handle various delimiters: comma, space, etc.
+            const parts = raw.split(/[\s,]+/).map(part => parseInt(part.trim())).filter(num => !isNaN(num));
+            const unique = [...new Set(parts)].filter(num => num >= 1 && num <= 45);
+            return unique.slice(0, 5);
+        }
+
+        async function generateLottoNumbers() {
+            const manualNumbers = parseManualInput();
+            
+            // Clear current numbers
+            numbersContainer.innerHTML = '';
+            
+            const pool = [];
+            for (let i = 1; i <= 45; i++) {
+                if (!manualNumbers.includes(i)) pool.push(i);
+            }
+            
+            const shuffled = shuffle(pool);
+            const autoCount = 6 - manualNumbers.length;
+            const finalNumbers = [...manualNumbers, ...shuffled.slice(0, autoCount)].sort((a, b) => a - b);
+
+            // Add balls with delay for animation effect
+            finalNumbers.forEach((num, index) => {
+                const ball = createBall(num, index * 0.1);
+                numbersContainer.appendChild(ball);
+            });
+        }
+
+        generateBtn.addEventListener('click', generateLottoNumbers);
+
+        // Initial generation
+        window.addEventListener('load', generateLottoNumbers);
+    </script>
 </body>
 </html>
 
-<!--dfdfdfd-->
